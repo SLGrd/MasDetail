@@ -1,0 +1,129 @@
+﻿@page "/testModel"
+
+@using System.ComponentModel.DataAnnotations; 
+@using Newtonsoft.Json;
+@using Common.Models;
+@using Common.Data;
+@using static Common.Glb;
+@using Common.Repositories;
+
+<PageTitle><span><img src="~/Navicon.svg" /></span>  Counter Validation $ Serialization</PageTitle>
+
+<TopBanner BannerTxt="Validation and Serialization"></TopBanner>
+
+<div class="text-center mt-4 mb-0">
+    <button class="btn btn-primary" style="width:320px"              @onclick="ValidateAndSerialize" > Validate </button>
+    <button class="btn btn-secondary @ButtonState" style="width:320px" @onclick="Save" > Save </button>
+    <button class="btn btn-danger" style="width:320px"               @onclick="DeleteAll" > Clear Invoices </button>
+</div>
+
+<div class="d-flex flex-row justify-content-between m-5 p-0 mt-3">
+    <div class="d-flex flex-column align-items-center" style="font-size:19px; color:indianred">
+        <label >Unformatted JSON</label>
+        <textarea id="w3review1" name="w3review" rows="24" cols="50">
+            @JsonText
+        </textarea>
+    </div>
+    <div class="d-flex flex-column align-items-center" style="font-size:19px; color:indianred">
+        <label>Formatted JSON</label>
+        <textarea id="w3review2" name="w3review" rows="24" cols="50">
+            @JsonTextFmt
+        </textarea>
+    </div>
+    <div class="d-flex flex-column align-items-center" style="font-size:19px; color:indianred">
+         <label>Error Messages</label>
+        <textarea id="w3review3" name="w3review" rows="24" cols="50">
+            @ValidationMsg
+        </textarea>
+    </div>
+</div>
+
+@code {
+    private string? ButtonState = "disabled";
+    private string? JsonText;
+    private string? JsonTextFmt;
+    private string? ValidationMsg;
+
+    //  Get Sample hard coded data, as an example
+    Invoice? Invoice; 
+    //Invoice InvOld; 
+
+    private void ValidateAndSerialize()
+    {              
+        try
+        {
+            //  Get sample data
+            Invoice = SampleData.CreateInvoice(); 
+            
+            //  Clear validation message
+            ValidationMsg = "";
+            //  Set context for model validation - Header
+            var context = new ValidationContext( Invoice.Header!, serviceProvider: null, items: null);
+            var validationResults = new List<ValidationResult>();
+            bool isValid = Validator.TryValidateObject( Invoice.Header!, context, validationResults, true);
+            if (!isValid) ButtonState = "disabled";   
+
+            // Get validation Results
+            if (validationResults.Count == 0)
+                ValidationMsg += "Header => No errors detected" + "\r";
+            else
+                for (int i = 0; i < validationResults.Count; i++)                
+                    ValidationMsg += "Header => " + validationResults.ElementAt(i) + "\r";
+
+
+            // Set context for model validation - every Line
+            for (int n = 0; n < Invoice.Lines!.Count; n++)
+            {
+                context = new ValidationContext( Invoice.Lines[n], serviceProvider: null, items: null);
+                validationResults = new List<ValidationResult>();
+                isValid = Validator.TryValidateObject( Invoice.Lines[n]!, context, validationResults, true);
+                if (!isValid) ButtonState = "disabled";
+
+                if (validationResults.Count == 0)
+                    ValidationMsg += $"Line {n} => No errors detected" + "\r";
+                else
+                    for (int i = 0; i < validationResults.Count; i++)
+                        ValidationMsg += $"Line {n} => " + validationResults.ElementAt(i) + "\r";            
+            }
+            //if ( Invoice == InvOld)
+            //{     
+                JsonText = System.Text.Json.JsonSerializer.Serialize< Invoice>( Invoice);
+                JsonTextFmt = Newtonsoft.Json.JsonConvert.SerializeObject( Invoice, Newtonsoft.Json.Formatting.Indented);       
+            //}
+
+            JsonText = System.Text.Json.JsonSerializer.Serialize< Invoice>( Invoice);
+            JsonTextFmt = Newtonsoft.Json.JsonConvert.SerializeObject( Invoice, Newtonsoft.Json.Formatting.Indented);
+        }
+        catch (Exception ex)
+        {
+            ValidationMsg = "Error : Testing Invoice Model=> " + ex.Message;
+        }
+        ButtonState = "";        
+    }
+
+    private void Save()
+    {
+        try
+        {
+            InvoiceCrud.SaveInvoice(Invoice!);
+            ValidationMsg += "Invoice saved to database";
+        }   
+        catch (Exception ex)
+        {
+            ValidationMsg += "Error : saving invoice to database => " + ex.Message + "\r";
+        }
+    }
+
+    private void DeleteAll()
+    {
+        try
+        {
+            InvoiceCrud.DeleteAll();
+            ValidationMsg += "Invoice table cleared";
+        }   
+        catch (Exception ex)
+        {
+            ValidationMsg += "Error : clearing invoice table failed" + ex.Message + "\r";
+        }
+    }
+}
