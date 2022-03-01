@@ -18,7 +18,7 @@ public class SampleData
         RowId       = 1
     };
 
-    private static  InvoiceLine InvLine11 = new()
+    private static  InvoiceLine InvLine11 = new( Header.Gid)
     {
         ItemNumber  = 31461,
         Description = "Description Item 31461",
@@ -29,7 +29,7 @@ public class SampleData
         RowId       = 1
     };
 
-    private static  InvoiceLine InvLine12 = new()
+    private static InvoiceLine InvLine12 = new( Header.Gid)
     {
         ItemNumber  = 98782,
         Description = "Description Item 98782",

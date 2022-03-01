@@ -4,8 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Common.Models;
 
 public class InvoiceHeader
-{
-    
+{    
     public int InvoiceNumber { get; set; }
 
     [Range(typeof(DateTime), "12/2/2004", "28/4/2024", ErrorMessage = "Value for {0} must be between {1} and {2}")]
@@ -95,23 +94,23 @@ public class InvoiceLine
     [Editable(false)]
     public int RowId { get; set; }
 
-    public InvoiceLine()
+    public InvoiceLine( Guid gid)
     {
-        ItemNumber = 0;
+        ItemNumber  = 0;
         Description = "";
-        Qtty = 1;
-        UnitPrice = 0;
-        Gid = new Guid();
-        RowId = 0;
+        Qtty        = 0;
+        UnitPrice   = 0;
+        Gid         = gid;
+        RowId       = 0;
     }
     public InvoiceLine(int itemNumber, string description, int qtty, decimal unitPrice, Guid gid, int rowId)
     {
-        ItemNumber = itemNumber;
+        ItemNumber  = itemNumber;
         Description = description;
-        Qtty = qtty;
-        UnitPrice = unitPrice;
-        Gid = gid;
-        RowId = rowId;
+        Qtty        = qtty;
+        UnitPrice   = unitPrice;
+        Gid         = gid;
+        RowId       = rowId;
     }
 }
 public class Invoice
@@ -174,3 +173,4 @@ public class ValidCpf : ValidationAttribute
         return (char)(Digit + '0');                                     //  Transforma em Ascii : ex 0 em Ascii é 48 binario
     }
 }
+

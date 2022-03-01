@@ -12,3 +12,12 @@ public static class Glb
     public enum FamStatus { Marido, Esposa, Filho, Neto };
     public enum Departments { Fin, Com, Eng }
 }
+
+public static class ExtensionMethods
+{
+    public static string ToCpf( this string cpf) 
+    {
+        string s = $"{cpf[0..3]}.{cpf[3..6]}.{cpf[6..9]}-{cpf[9..11]}";
+        return s;
+    }
+}
